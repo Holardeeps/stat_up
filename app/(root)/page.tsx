@@ -2,12 +2,17 @@ import StartupCard, { StartupTypeCard } from "@/components/StartupCard";
 import SearchForm from "../../components/SearchForm";
 import { STARTUPS_QUERY } from "@/sanity/lib/queries";
 import { sanityFetch, SanityLive } from "@/sanity/lib/live";
+import { auth } from "@/auth";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ query?: string }>}) {
 
   // const query = (await searchParams).query;
   const { query } = await searchParams
   const params = { search: query || null }
+
+  const session = await auth();
+
+  console.log(session?.id)
 
   // const posts = await client.fetch(STARTUPS_QUERY)
   const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY , params })
