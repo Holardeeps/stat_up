@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { formatDate } from "@/lib/utils";
 import { client } from "@/sanity/lib/client";
 import { STARTUP_BY_ID_QUERY } from "@/sanity/lib/queries";
@@ -5,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import markdownit from "markdown-it"
+import { Skeleton } from "@/components/ui/skeleton";
+import View from "@/components/View";
 
 const md = markdownit()
 // export const experimental_ppr = true;
@@ -60,12 +64,18 @@ const page = async ({ params }: Params) => {
         {parsedContent ? (
           <article
             dangerouslySetInnerHTML={{__html: parsedContent}}
-            className="prose"
+            className="prose max-w-4xl font-work-sans break-all"
            />
         ) : (
           <p className="no-result">No details provided</p>
         )}
       </div>
+
+      <hr className="divider" />
+
+      <Suspense fallback={<Skeleton className="view_skeleton" />}>
+        <View id={id} />
+      </Suspense>
     </section>
     </>
   )
