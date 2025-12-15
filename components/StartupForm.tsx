@@ -35,12 +35,12 @@ const StartupForm = () => {
             await formSchema.parseAsync(formValues);
 
             const result = await createPitch(prevState, formData, pitch) 
-            console.log(result)
+            // console.log(result)
 
             if(result.status === "SUCCESS") {
                 toast.success(<div>
-                    <p className="font-semibold text-red-700">Success</p>
-                    <p className="text-sm text-red-600">
+                    <p className="font-semibold text-green-700">Success</p>
+                    <p className="text-sm text-green-500">
                     Your startup pitch has been created successfully.
                     </p>
                 </div>)
@@ -56,8 +56,8 @@ const StartupForm = () => {
 
                toast.error(
                 <div>
-                    <p className="font-semibold text-green-700">Error</p>
-                    <p className="text-sm text-green-500">
+                    <p className="font-semibold text-red-700">Error</p>
+                    <p className="text-sm text-red-600">
                     Please check your inputs and try again
                     </p>
                 </div>
