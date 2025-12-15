@@ -9,11 +9,18 @@ import { Button } from './ui/button';
 import { Send } from 'lucide-react';
 import { Spinner } from './ui/spinner';
 import { formSchema } from '@/lib/validation';
+import { ZodError } from "zod"
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { createPitch } from '@/lib/action';
+
+
 
 const StartupForm = () => {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [pitch, setPitch] = useState("")
+    const router = useRouter();
 
     const handleFormSubmit =  async (prevState: any, formData: FormData) => {
         try {
@@ -26,15 +33,54 @@ const StartupForm = () => {
             }
 
             await formSchema.parseAsync(formValues);
-            console.log(formValues)
 
-            // const result = await createIdea(prevState, formData, pitch) 
-            // console.log(result)
+            const result = await createPitch(prevState, formData, pitch) 
+            console.log(result)
+
+            if(result.status === "SUCCESS") {
+                toast.success(<div>
+                    <p className="font-semibold text-red-700">Success</p>
+                    <p className="text-sm text-red-600">
+                    Your startup pitch has been created successfully.
+                    </p>
+                </div>)
+                router.push(`/startup/${result._id}`)
+            }
+            return result;
 
         } catch ( error ) {
+            if (error instanceof ZodError) {
+                const fieldErrors = error.flatten().fieldErrors;
 
-        } finally {
+                setErrors(fieldErrors as unknown as Record<string, string>);
 
+               toast.error(
+                <div>
+                    <p className="font-semibold text-green-700">Error</p>
+                    <p className="text-sm text-green-500">
+                    Please check your inputs and try again
+                    </p>
+                </div>
+                )
+
+
+                return { ...prevState, error: "Validation failed", status: "ERROR"}
+            }
+
+            toast.error(
+                <div>
+                    <p className="font-semibold text-red-700">Error</p>
+                    <p className="text-sm text-red-600">
+                    An unexpected error has occured
+                    </p>
+                </div>
+                )
+
+            return {
+                ...prevState,
+                error: "An unexpected error has occured",
+                status: "ERROR"
+            }
         }
 
     }
@@ -48,7 +94,7 @@ const StartupForm = () => {
 
     
   return (
-    <form action="" className="startup-form">
+    <form action={formAction} className="startup-form">
         <div className="">
             <label htmlFor="title" className="startup-form_label">Title</label>
             <Input
@@ -58,7 +104,7 @@ const StartupForm = () => {
                 required
                 placeholder="Startup Title"
              />
-            { errors.title && <p className='startup-form_error'>{errors.title}</p>}
+            { errors.title && <p className='startup-form_error italic text-lg '>{errors.title}</p>}
         </div>
         <div className="">
             <label htmlFor="description" className="startup-form_label">Description</label>
@@ -70,7 +116,7 @@ const StartupForm = () => {
                 placeholder="Startup Description"
              />
             { errors.description && 
-                <p className='startup-form_error'>{errors.description}</p>
+                <p className='startup-form_error italic text-lg '>{errors.description}</p>
             }
         </div>
         <div className="">
@@ -82,7 +128,7 @@ const StartupForm = () => {
                 required
                 placeholder="Startup Category (Tech, Health, Education...)"
              />
-            { errors.category && <p className='startup-form_error'>{errors.category}</p>}
+            { errors.category && <p className='startup-form_error italic text-lg '>{errors.category}</p>}
         </div>
         <div className="">
             <label htmlFor="link" className="startup-form_label">Image URL</label>
@@ -93,7 +139,7 @@ const StartupForm = () => {
                 required
                 placeholder="Startup Image URL"
              />
-            { errors.link && <p className='startup-form_error'>{errors.link}</p>}
+            { errors.link && <p className='startup-form_error italic text-lg '>{errors.link}</p>}
         </div>
         <div className="" data-color-mode="light" >
             <label htmlFor="pitch" className="startup-form_label">Pitch</label>
@@ -111,7 +157,7 @@ const StartupForm = () => {
                     disallowedElements: ["style"]
                 }}
              />
-            { errors.pitch && <p className='startup-form_error'>{errors.pitch}</p>}
+            { errors.pitch && <p className='startup-form_error italic text-lg '>{errors.pitch}</p>}
         </div>
 
         <Button
